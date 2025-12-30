@@ -8,9 +8,12 @@ async function main() {
         await prisma.$connect();
         console.log("Server Connected to database successfully!");
         app.listen(port, () => {
-            console.log(`server is running on port ${3000}`);
+            console.log(`server is running on port ${port}`);
         });
     } catch (error: any) {
-        throw new Error("An Server side error has been occured!", error);
+        console.log("An Server side error has been occured!", error);
+        await prisma.$disconnect();
+        process.exit(1);
     }
 }
+main();
