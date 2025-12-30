@@ -31,19 +31,28 @@ model Post {
   createdAt DateTime @default(now())
   upDatedAt DateTime @updatedAt 
   comments Comment[]
+
+@@index([id])
+  @@map("posts")
 }
 enum CommentStatus { 
   approved
   rejected
 }
 model Comment { 
-commentId String @id @default(uuid()) 
+id String @id @default(uuid()) 
 content String @db.Text
 authorId String
 postId String 
 post Post @relation(fields: [postId], references: [id]) 
 parentId String
+parent Comment? @relation("CommentReplies", fields: [parentId], references: [id])  //self relation
+replies Comment[] @relation("CommentReplies")
 status CommentStatus @default(approved)
 createdAt DateTime @default(now())
 upDatedAt DateTime @updatedAt
+
+@@index([postId])
+@@index([authorId])
+@@map("comments")
 }
