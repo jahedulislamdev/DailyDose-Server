@@ -32,7 +32,7 @@ model Post {
   upDatedAt DateTime @updatedAt 
   comments Comment[]
 
-@@index([id])
+  @@index([id])
   @@map("posts")
 }
 enum CommentStatus { 
