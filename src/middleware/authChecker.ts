@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import { auth } from "../lib/auth";
 import { serverError } from "../utils/server.error";
 import { UserRole } from "../types/enum/enum";
+import { auth } from "../lib/auth";
 
 const authChecker = (...roles: UserRole[]) => {
     return async (req: Request, res: Response, next: NextFunction) => {
@@ -27,7 +27,7 @@ const authChecker = (...roles: UserRole[]) => {
                 role: session.user.role as string,
                 emailVerified: session.user.emailVerified,
             };
-            // console.log({ AccessRole: roles, session });
+            console.log({ AccessRole: roles, session });
             if (roles.length && !roles.includes(req.user?.role as UserRole)) {
                 return res.status(401).json({
                     success: false,
