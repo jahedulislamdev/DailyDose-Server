@@ -4,6 +4,7 @@ import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth";
 import config from "./config";
 import cors from "cors";
+import authChecker from "./middleware/authChecker";
 
 // create express app
 const app: Application = express();
@@ -18,7 +19,7 @@ app.use(
 );
 
 // App routes
-app.all("/api/auth/{*any}", toNodeHandler(auth));
+app.all("/api/auth/{*any}", authChecker("user", "admin"), toNodeHandler(auth));
 app.use("/api/v1/posts", postRoute);
 
 app.get("/", (req: Request, res: Response) => {
