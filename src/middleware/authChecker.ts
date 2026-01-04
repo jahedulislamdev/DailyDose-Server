@@ -27,7 +27,7 @@ const authChecker = (...roles: UserRole[]) => {
                 role: session.user.role as string,
                 emailVerified: session.user.emailVerified,
             };
-            console.log({ AccessRole: roles, session });
+            // console.log({ AccessRole: roles, session });
             if (roles.length && !roles.includes(req.user?.role as UserRole)) {
                 return res.status(401).json({
                     success: false,

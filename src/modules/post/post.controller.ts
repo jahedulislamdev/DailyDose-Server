@@ -36,7 +36,30 @@ const getPosts = async (req: Request, res: Response) => {
     }
 };
 
+const searchPostbyTitle = async (req: Request, res: Response) => {
+    try {
+        const { search } = req.query;
+        // console.log(req.query);
+
+        const searchStr = typeof search === "string" ? search : undefined;
+        const result = await postService.searchPostbyTitle({
+            search: searchStr,
+        });
+        if (result.length === 0) {
+            res.status(404).json({ success: false, message: "No Post Found!" });
+        } else {
+            res.status(200).json({
+                success: true,
+                message: "post retrived successfully!",
+                data: result,
+            });
+        }
+    } catch (err) {
+        serverError(res, err);
+    }
+};
 export const postController = {
     createPost,
     getPosts,
+    searchPostbyTitle,
 };
