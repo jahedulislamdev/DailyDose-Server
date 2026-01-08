@@ -1,6 +1,6 @@
+import { serverError } from "../../utils/server.error";
 import { Request, Response } from "express";
 import { postService } from "./post.service";
-import { serverError } from "../../utils/server.error";
 
 const createPost = async (req: Request, res: Response) => {
     try {
@@ -36,18 +36,29 @@ const getPosts = async (req: Request, res: Response) => {
     }
 };
 
-const searchPostbyTitle = async (req: Request, res: Response) => {
+const searchPost = async (req: Request, res: Response) => {
     try {
-        const { search } = req.query;
+        const { search, tags } = req.query;
         // console.log(req.query);
+        const filterdTags = tags
+            ? (tags as string)
+                  .split(",")
+                  .map((t) => t.trim())
+                  .filter(Boolean)
+            : [];
+        // ["environment","election","education"] : [""]
 
-        const searchStr = typeof search === "string" ? search : undefined;
-        const result = await postService.searchPostbyTitle({
-            search: searchStr,
-        });
-        if (result.length === 0) {
+        // const searchStr = typeof search === "string" ? search : undefined;
+
+        const searchValue =
+            typeof search === "string" && search.trim() !== ""
+                ? search.trim()
+                : undefined; //searchStr -> visa processing system : undefined
+
+        const result = await postService.searchPost(searchValue, filterdTags);
+        if (Array.isArray(result) && result.length === 0) {
             res.status(404).json({ success: false, message: "No Post Found!" });
-        } else {
+        } else if (Array.isArray(result)) {
             res.status(200).json({
                 success: true,
                 message: "post retrived successfully!",
@@ -58,8 +69,9 @@ const searchPostbyTitle = async (req: Request, res: Response) => {
         serverError(res, err);
     }
 };
+
 export const postController = {
     createPost,
     getPosts,
-    searchPostbyTitle,
+    searchPost,
 };
