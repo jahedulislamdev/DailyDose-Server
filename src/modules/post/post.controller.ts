@@ -23,19 +23,6 @@ const createPost = async (req: Request, res: Response) => {
     }
 };
 
-const getPosts = async (req: Request, res: Response) => {
-    try {
-        const results = await postService.getPosts();
-        res.status(200).json({
-            success: true,
-            message: "Posts retrieved successfully",
-            data: results,
-        });
-    } catch (err) {
-        serverError(res, err);
-    }
-};
-
 const searchPost = async (req: Request, res: Response) => {
     try {
         const { search, tags } = req.query;
@@ -55,7 +42,7 @@ const searchPost = async (req: Request, res: Response) => {
                 ? search.trim()
                 : undefined; //searchStr -> visa processing system : undefined
 
-        const result = await postService.searchPost(searchValue, filterdTags);
+        const result = await postService.getPosts(searchValue, filterdTags);
         if (Array.isArray(result) && result.length === 0) {
             res.status(404).json({ success: false, message: "No Post Found!" });
         } else if (Array.isArray(result)) {
@@ -72,6 +59,5 @@ const searchPost = async (req: Request, res: Response) => {
 
 export const postController = {
     createPost,
-    getPosts,
     searchPost,
 };

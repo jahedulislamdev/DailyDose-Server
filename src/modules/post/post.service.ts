@@ -12,13 +12,8 @@ const createPost = async (
     return result;
 };
 
-const getPosts = async () => {
-    const result = await prisma.post.findMany();
-    return result;
-};
-
 // searching
-const searchPost = async (
+const getPosts = async (
     searchedValue: string | undefined,
     filteredTags: string[],
 ) => {
@@ -63,5 +58,4 @@ const searchPost = async (
 export const postService = {
     createPost,
     getPosts,
-    searchPost,
 };
