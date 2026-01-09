@@ -21,6 +21,8 @@ const getPosts = async (
     authorId: string | undefined,
     skip: number,
     limit: number,
+    sortBy: string | undefined,
+    sortOrder: string | undefined,
 ) => {
     let andConditions: PostWhereInput[] = [];
     if (searchedValue) {
@@ -77,6 +79,14 @@ const getPosts = async (
         where: {
             AND: andConditions,
         },
+        orderBy:
+            sortBy && sortOrder
+                ? {
+                      [sortBy]: sortOrder,
+                  }
+                : {
+                      createdAt: "desc",
+                  },
     });
     return result;
 };

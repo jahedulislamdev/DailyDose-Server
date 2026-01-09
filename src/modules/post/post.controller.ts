@@ -26,8 +26,17 @@ const createPost = async (req: Request, res: Response) => {
 
 const searchPost = async (req: Request, res: Response) => {
     try {
-        const { search, tags, isFeatured, status, authorId, page, limit } =
-            req.query;
+        const {
+            search,
+            tags,
+            isFeatured,
+            status,
+            authorId,
+            page,
+            limit,
+            sortBy,
+            sortOrder,
+        } = req.query;
 
         // filter by multiple tags
         const filterdTags = tags
@@ -76,6 +85,8 @@ const searchPost = async (req: Request, res: Response) => {
             authorId as string | undefined,
             skippedPosts,
             postLimit,
+            sortBy as string | undefined,
+            sortOrder as string | undefined,
         );
         if (Array.isArray(result) && result.length === 0) {
             res.status(404).json({
