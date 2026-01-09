@@ -1,6 +1,6 @@
+import { UserRole } from "../types/enum/enum";
 import { prisma } from "../lib/prisma";
 import config from "../config";
-import { UserRole } from "../types/enum/enum";
 
 /**
  * Seeds a default admin user into the system.
