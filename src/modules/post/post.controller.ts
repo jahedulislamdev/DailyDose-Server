@@ -63,7 +63,7 @@ const searchPost = async (req: Request, res: Response) => {
                 : undefined;
 
         // pagination and sorting
-        const { limit, sortBy, skip, sortOrder } = paginationSortHelper(
+        const { page, limit, sortBy, skip, sortOrder } = paginationSortHelper(
             req.query as any,
         );
 
@@ -76,22 +76,16 @@ const searchPost = async (req: Request, res: Response) => {
             authorId as string | undefined,
             skip,
             limit,
+            page,
             sortBy as string | undefined,
             sortOrder as string | undefined,
         );
-        if (Array.isArray(result) && result.length === 0) {
-            res.status(404).json({
-                success: false,
-                message: "No Post Found!",
-                data: result,
-            });
-        } else if (Array.isArray(result)) {
-            res.status(200).json({
-                success: true,
-                message: "post retrived successfully!",
-                data: result,
-            });
-        }
+        // res.status(200).json(result);
+        res.status(200).json({
+            success: true,
+            message: "post retrived successfully!",
+            data: result,
+        });
     } catch (err) {
         serverError(res, err);
     }
