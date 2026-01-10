@@ -2,6 +2,7 @@ import { serverError } from "../../utils/server.error";
 import { Request, Response } from "express";
 import { postService } from "./post.service";
 import { PostStatus } from "../../../generated/prisma/enums";
+import paginationSortHelper from "../../utils/paginationSortingHelper";
 
 const createPost = async (req: Request, res: Response) => {
     try {
@@ -26,17 +27,7 @@ const createPost = async (req: Request, res: Response) => {
 
 const searchPost = async (req: Request, res: Response) => {
     try {
-        const {
-            search,
-            tags,
-            isFeatured,
-            status,
-            authorId,
-            page,
-            limit,
-            sortBy,
-            sortOrder,
-        } = req.query;
+        const { search, tags, isFeatured, status, authorId } = req.query;
 
         // filter by multiple tags
         const filterdTags = tags
@@ -71,10 +62,10 @@ const searchPost = async (req: Request, res: Response) => {
                 ? status
                 : undefined;
 
-        // pagination values
-        const postPage = Number(page ?? 1);
-        const postLimit = Number(limit ?? 10);
-        const skippedPosts = (postPage - 1) * postLimit;
+        // pagination and sorting
+        const { limit, sortBy, skip, sortOrder } = paginationSortHelper(
+            req.query as any,
+        );
 
         // call service method
         const result = await postService.getPosts(
@@ -83,8 +74,8 @@ const searchPost = async (req: Request, res: Response) => {
             featuredPosts,
             postStatus as PostStatus | undefined,
             authorId as string | undefined,
-            skippedPosts,
-            postLimit,
+            skip,
+            limit,
             sortBy as string | undefined,
             sortOrder as string | undefined,
         );
