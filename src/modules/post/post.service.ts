@@ -1,4 +1,8 @@
-import { Post, PostStatus } from "../../../generated/prisma/client";
+import {
+    CommentStatus,
+    Post,
+    PostStatus,
+} from "../../../generated/prisma/client";
 import { PostWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
 
@@ -6,13 +10,12 @@ const createPost = async (
     data: Omit<Post, "id" | "createdAt" | "updatedAt">,
     userId: string,
 ) => {
-    const result = await prisma.post.create({
+    return await prisma.post.create({
         data: { ...data, authorId: userId },
     });
-    return result;
 };
 
-// searching
+// get post with searching,sorting,filtering and pagination
 const getPosts = async (
     searchedValue: string | undefined,
     filteredTags: string[],
@@ -80,6 +83,13 @@ const getPosts = async (
         where: {
             AND: andConditions,
         },
+        include: {
+            _count: {
+                select: {
+                    comments: true,
+                },
+            },
+        },
         orderBy:
             sortBy && sortOrder
                 ? {
@@ -118,12 +128,41 @@ const getPostbyId = async (postId: string) => {
                 },
             },
         });
-        const result = await tx.post.findUnique({
+        return await tx.post.findUnique({
             where: {
                 id: postId,
             },
+            include: {
+                comments: {
+                    where: {
+                        parentId: null,
+                        status: CommentStatus.APPROVED,
+                    },
+                    orderBy: {
+                        createdAt: "desc",
+                    },
+                    include: {
+                        replies: {
+                            where: {
+                                status: CommentStatus.APPROVED,
+                            },
+                            include: {
+                                replies: {
+                                    where: {
+                                        status: CommentStatus.APPROVED,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                _count: {
+                    select: {
+                        comments: true,
+                    },
+                },
+            },
         });
-        return result;
     });
 };
 
