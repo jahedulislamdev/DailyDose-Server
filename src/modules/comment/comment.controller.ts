@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { commentService } from "./comment.service";
 import { serverError } from "../../utils/server.error";
+import { success } from "better-auth/*";
 
 const createComment = async (req: Request, res: Response) => {
     const user = req.user;
@@ -40,8 +41,26 @@ const getCommentByAuthorId = async (req: Request, res: Response) => {
         serverError(res, e);
     }
 };
+const deleteComment = async (req: Request, res: Response) => {
+    try {
+        const user = req.user;
+        const { commentId } = req.params;
+        const result = await commentService.deleteComment(
+            commentId as string,
+            user?.id as string,
+        );
+        res.status(200).json({
+            success: true,
+            message: "comment delete successfully!",
+            data: result,
+        });
+    } catch (e) {
+        serverError(res, e);
+    }
+};
 export const commentController = {
     createComment,
     getCommentById,
     getCommentByAuthorId,
+    deleteComment,
 };

@@ -56,9 +56,27 @@ const getCommentByAuthorId = async (authorId: string) => {
         },
     });
 };
+const deleteComment = async (commentId: string, authorId: string) => {
+    console.log({ commentId, authorId });
 
+    const existComment = await prisma.comment.findUniqueOrThrow({
+        where: {
+            id: commentId,
+            authorId,
+        },
+    });
+    if (existComment.authorId !== authorId) {
+        throw new Error("Unauthorized!");
+    }
+    return prisma.comment.delete({
+        where: {
+            id: commentId,
+        },
+    });
+};
 export const commentService = {
     createComment,
     getCommentById,
     getCommentByAuthorId,
+    deleteComment,
 };
