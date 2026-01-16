@@ -1,3 +1,4 @@
+import { CommentStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 
 const createComment = async (payload: {
@@ -74,9 +75,37 @@ const deleteComment = async (commentId: string, authorId: string) => {
         },
     });
 };
+const updateCommentStatus = async (
+    commentId: string,
+    authorId: string,
+    status: CommentStatus,
+) => {
+    // console.log({ commentId, authorId, status });
+
+    const currentComment = await prisma.comment.findUniqueOrThrow({
+        where: {
+            id: commentId,
+            authorId,
+        },
+    });
+    console.log(currentComment);
+
+    if (currentComment?.status === status) {
+        throw new Error("Status Already up-to-date!");
+    }
+    return await prisma.comment.update({
+        where: {
+            id: commentId,
+        },
+        data: {
+            status,
+        },
+    });
+};
 export const commentService = {
     createComment,
     getCommentById,
     getCommentByAuthorId,
     deleteComment,
+    updateCommentStatus,
 };

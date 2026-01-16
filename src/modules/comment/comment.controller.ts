@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { commentService } from "./comment.service";
 import { serverError } from "../../utils/server.error";
-import { success } from "better-auth/*";
+import { CommentStatus } from "../../../generated/prisma/enums";
 
 const createComment = async (req: Request, res: Response) => {
     const user = req.user;
@@ -58,9 +58,28 @@ const deleteComment = async (req: Request, res: Response) => {
         serverError(res, e);
     }
 };
+
+const updateCommentStatus = async (req: Request, res: Response) => {
+    try {
+        const result = await commentService.updateCommentStatus(
+            req.params.commentId as string,
+            req.user?.id as string,
+            req.body.status as CommentStatus,
+        );
+        res.status(200).json({
+            success: true,
+            message: "comment status update successfully!",
+            data: result,
+        });
+    } catch (e) {
+        console.log(e);
+        serverError(res, e);
+    }
+};
 export const commentController = {
     createComment,
     getCommentById,
     getCommentByAuthorId,
     deleteComment,
+    updateCommentStatus,
 };
