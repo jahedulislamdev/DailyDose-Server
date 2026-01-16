@@ -22,7 +22,7 @@ app.use(
 
 // App routes
 app.all("/api/auth/{*any}", toNodeHandler(auth));
-app.use("/api/v1/posts", authChecker(UserRole.ADMIN), postRoute);
+app.use("/api/v1/posts", postRoute);
 app.use("/api/v1/comments", commentRoute);
 
 app.get("/", (req: Request, res: Response) => {

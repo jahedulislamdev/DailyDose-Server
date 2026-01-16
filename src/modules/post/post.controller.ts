@@ -4,6 +4,7 @@ import { postService } from "./post.service";
 import { PostStatus } from "../../../generated/prisma/enums";
 import paginationSortHelper from "../../utils/paginationSortingHelper";
 import { success } from "better-auth/*";
+import { UserRole } from "../../types/enum/enum";
 
 const createPost = async (req: Request, res: Response) => {
     try {
@@ -92,16 +93,64 @@ const getPosts = async (req: Request, res: Response) => {
     }
 };
 
-const getPostbyId = async (req: Request, res: Response) => {
+const getPostbyAuthorId = async (req: Request, res: Response) => {
     try {
-        const { postId } = req.params;
-        if (!postId) {
-            throw new Error("provide a valid PostId!");
-        }
-        const result = await postService.getPostbyId(postId);
+        console.log(req.user);
+
+        const { authorId } = req.params;
+        const result = await postService.getPostbyAuthorId(authorId as string);
         res.status(200).json({
             success: true,
-            message: "Post Retrived successfully!",
+            message: "Posts retrieved successfully!",
+            data: result,
+        });
+    } catch (err) {
+        serverError(res, err);
+    }
+};
+
+const updatePost = async (req: Request, res: Response) => {
+    try {
+        if (!req.user?.id) {
+            throw new Error("Unauthorized");
+        }
+        const result = await postService.updatePost(
+            req.user?.id as string,
+            req.user?.role as UserRole,
+            req.params.postId as string,
+            req.body,
+        );
+        res.status(200).json({
+            success: true,
+            message: "Posts retrieved successfully!",
+            data: result,
+        });
+    } catch (err) {
+        serverError(res, err);
+    }
+};
+const deletePost = async (req: Request, res: Response) => {
+    try {
+        const result = await postService.deletePost(
+            req.user?.id as string,
+            req.params.postId as string,
+            req.user?.role as UserRole,
+        );
+        res.status(200).json({
+            success: true,
+            message: "Post deleted successfully!",
+            data: result,
+        });
+    } catch (err) {
+        serverError(res, err);
+    }
+};
+const getStats = async (req: Request, res: Response) => {
+    try {
+        const result = await postService.getStats();
+        res.status(200).json({
+            success: true,
+            message: "state featched successfully!",
             data: result,
         });
     } catch (err) {
@@ -111,5 +160,8 @@ const getPostbyId = async (req: Request, res: Response) => {
 export const postController = {
     createPost,
     getPosts,
-    getPostbyId,
+    getPostbyAuthorId,
+    updatePost,
+    deletePost,
+    getStats,
 };

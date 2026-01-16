@@ -5,6 +5,7 @@ import {
 } from "../../../generated/prisma/client";
 import { PostWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
+import { UserRole } from "../../types/enum/enum";
 
 const createPost = async (
     data: Omit<Post, "id" | "createdAt" | "updatedAt">,
@@ -166,8 +167,137 @@ const getPostbyId = async (postId: string) => {
     });
 };
 
+const getPostbyAuthorId = async (authorId: string) => {
+    await prisma.user.findUniqueOrThrow({
+        where: { id: authorId, status: "ACTIVE" },
+    });
+    const result = await prisma.post.findMany({
+        where: { authorId },
+        orderBy: {
+            createdAt: "desc",
+        },
+        include: {
+            _count: {
+                select: { comments: true },
+            },
+        },
+    });
+    const totalPost = await prisma.post.aggregate({
+        _count: {
+            id: true,
+        },
+        where: {
+            authorId,
+        },
+    });
+    return { totalPost, posts: result };
+};
+
+const updatePost = async (
+    authorId: string,
+    role: UserRole,
+    postId: string,
+    updatedData: Partial<Post>,
+) => {
+    const existValidPost = await prisma.post.findUnique({
+        where: {
+            id: postId,
+        },
+        select: {
+            id: true,
+            authorId: true,
+        },
+    });
+    if (role !== UserRole.ADMIN && existValidPost?.authorId !== authorId) {
+        throw new Error("Unauthorized!");
+    }
+    if (role !== UserRole.ADMIN) {
+        delete updatedData.isFeatured;
+    }
+    return await prisma.post.update({
+        where: {
+            id: postId,
+        },
+        data: updatedData,
+    });
+};
+
+const deletePost = async (authorId: string, postId: string, role: UserRole) => {
+    const existValidPost = await prisma.post.findUniqueOrThrow({
+        where: { id: postId },
+        select: {
+            id: true,
+            authorId: true,
+        },
+    });
+    if (role !== UserRole.ADMIN && existValidPost?.authorId !== authorId) {
+        throw new Error("Unauthorized!");
+    }
+    return await prisma.post.delete({
+        where: {
+            id: postId,
+        },
+    });
+};
+
+const getStats = async () => {
+    return await prisma.$transaction(async (tx) => {
+        const [
+            posts,
+            publishedPosts,
+            archivedPosts,
+            draftPosts,
+            comments,
+            approvedComments,
+            rejectedComments,
+            totalUser,
+            admins,
+            users,
+            totalPostviewers,
+        ] = await Promise.all([
+            // post statistics
+            await tx.post.count(),
+            await tx.post.count({ where: { status: PostStatus.PUBLISHED } }),
+            await tx.post.count({ where: { status: PostStatus.ARCHIVED } }),
+            await tx.post.count({ where: { status: PostStatus.DRAFT } }),
+            // comment statistics
+            await tx.comment.count(),
+            await tx.comment.count({
+                where: { status: CommentStatus.APPROVED },
+            }),
+            await tx.comment.count({
+                where: { status: CommentStatus.REJECTED },
+            }),
+            // user statistics
+            await tx.user.count(),
+            await tx.user.count({ where: { role: UserRole.ADMIN } }),
+            await tx.user.count({ where: { role: UserRole.USER } }),
+            // all post viewer count
+            await tx.post.aggregate({
+                _sum: { views: true },
+            }),
+        ]);
+        return {
+            posts,
+            publishedPosts,
+            archivedPosts,
+            draftPosts,
+            comments,
+            approvedComments,
+            rejectedComments,
+            totalUser,
+            admins,
+            users,
+            totalPostviewers: totalPostviewers._sum.views,
+        };
+    });
+};
 export const postService = {
     createPost,
     getPosts,
     getPostbyId,
+    getPostbyAuthorId,
+    updatePost,
+    deletePost,
+    getStats,
 };
