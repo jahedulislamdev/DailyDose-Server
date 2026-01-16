@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import { serverError } from "../utils/server.error";
 import { UserRole } from "../types/enum/enum";
 import { auth } from "../lib/auth";
 
@@ -36,7 +35,7 @@ const authChecker = (...roles: UserRole[]) => {
             }
             next();
         } catch (err) {
-            serverError(res, err);
+            next(err);
         }
     };
 };

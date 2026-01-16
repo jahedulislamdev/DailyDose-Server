@@ -1,12 +1,10 @@
-import { serverError } from "../../utils/server.error";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { postService } from "./post.service";
 import { PostStatus } from "../../../generated/prisma/enums";
 import paginationSortHelper from "../../utils/paginationSortingHelper";
-import { success } from "better-auth/*";
 import { UserRole } from "../../types/enum/enum";
 
-const createPost = async (req: Request, res: Response) => {
+const createPost = async (req: Request, res: Response, next: NextFunction) => {
     try {
         console.log(req.user);
 
@@ -23,11 +21,11 @@ const createPost = async (req: Request, res: Response) => {
             data: result,
         });
     } catch (err: any) {
-        serverError(res, err);
+        next(err);
     }
 };
 
-const getPosts = async (req: Request, res: Response) => {
+const getPosts = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { search, tags, isFeatured, status, authorId } = req.query;
 
@@ -89,11 +87,15 @@ const getPosts = async (req: Request, res: Response) => {
             data: result,
         });
     } catch (err) {
-        serverError(res, err);
+        next(err);
     }
 };
 
-const getPostbyAuthorId = async (req: Request, res: Response) => {
+const getPostbyAuthorId = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
     try {
         console.log(req.user);
 
@@ -105,11 +107,11 @@ const getPostbyAuthorId = async (req: Request, res: Response) => {
             data: result,
         });
     } catch (err) {
-        serverError(res, err);
+        next(err);
     }
 };
 
-const updatePost = async (req: Request, res: Response) => {
+const updatePost = async (req: Request, res: Response, next: NextFunction) => {
     try {
         if (!req.user?.id) {
             throw new Error("Unauthorized");
@@ -126,10 +128,10 @@ const updatePost = async (req: Request, res: Response) => {
             data: result,
         });
     } catch (err) {
-        serverError(res, err);
+        next(err);
     }
 };
-const deletePost = async (req: Request, res: Response) => {
+const deletePost = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const result = await postService.deletePost(
             req.user?.id as string,
@@ -142,10 +144,10 @@ const deletePost = async (req: Request, res: Response) => {
             data: result,
         });
     } catch (err) {
-        serverError(res, err);
+        next(err);
     }
 };
-const getStats = async (req: Request, res: Response) => {
+const getStats = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const result = await postService.getStats();
         res.status(200).json({
@@ -154,7 +156,7 @@ const getStats = async (req: Request, res: Response) => {
             data: result,
         });
     } catch (err) {
-        serverError(res, err);
+        next(err);
     }
 };
 export const postController = {

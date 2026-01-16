@@ -1,18 +1,29 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { commentService } from "./comment.service";
-import { serverError } from "../../utils/server.error";
 import { CommentStatus } from "../../../generated/prisma/enums";
 
-const createComment = async (req: Request, res: Response) => {
-    const user = req.user;
-    req.body.authorId = user?.id;
-    //  console.log(req.body);
+const createComment = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        const user = req.user;
+        req.body.authorId = user?.id;
+        //  console.log(req.body);
 
-    const result = await commentService.createComment(req.body);
-    res.status(201).send(result);
+        const result = await commentService.createComment(req.body);
+        res.status(201).send(result);
+    } catch (e) {
+        next(e);
+    }
 };
 
-const getCommentById = async (req: Request, res: Response) => {
+const getCommentById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
     try {
         const { commentId } = req.params;
         const result = await commentService.getCommentById(commentId as string);
@@ -22,11 +33,15 @@ const getCommentById = async (req: Request, res: Response) => {
             data: result,
         });
     } catch (e) {
-        serverError(res, e);
+        next(e);
     }
 };
 
-const getCommentByAuthorId = async (req: Request, res: Response) => {
+const getCommentByAuthorId = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
     const { authorId } = req.params;
     try {
         const result = await commentService.getCommentByAuthorId(
@@ -38,10 +53,14 @@ const getCommentByAuthorId = async (req: Request, res: Response) => {
             data: result,
         });
     } catch (e) {
-        serverError(res, e);
+        next(e);
     }
 };
-const deleteComment = async (req: Request, res: Response) => {
+const deleteComment = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
     try {
         const user = req.user;
         const { commentId } = req.params;
@@ -55,11 +74,15 @@ const deleteComment = async (req: Request, res: Response) => {
             data: result,
         });
     } catch (e) {
-        serverError(res, e);
+        next(e);
     }
 };
 
-const updateCommentStatus = async (req: Request, res: Response) => {
+const updateCommentStatus = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
     try {
         const result = await commentService.updateCommentStatus(
             req.params.commentId as string,
@@ -72,8 +95,7 @@ const updateCommentStatus = async (req: Request, res: Response) => {
             data: result,
         });
     } catch (e) {
-        console.log(e);
-        serverError(res, e);
+        next(e);
     }
 };
 export const commentController = {

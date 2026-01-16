@@ -4,9 +4,9 @@ import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth";
 import config from "./config";
 import cors from "cors";
-import authChecker from "./middleware/authChecker";
-import { UserRole } from "./types/enum/enum";
 import { commentRoute } from "./modules/comment/comment.route";
+import errHandler from "./middleware/globalErrHandler";
+import routeNotFound from "./middleware/notFound";
 
 // create express app
 const app: Application = express();
@@ -28,11 +28,11 @@ app.use("/api/v1/comments", commentRoute);
 app.get("/", (req: Request, res: Response) => {
     res.send("dailydoe is running..");
 });
-app.use((req: Request, res: Response) => {
-    res.status(404).send({
-        success: false,
-        message: "Route Not Found!",
-        path: req.path,
-    });
-});
+
+// 404 handler
+app.use(routeNotFound);
+
+// global error handler
+app.use(errHandler);
+
 export default app;
