@@ -40,6 +40,7 @@ export const auth = betterAuth({
         autoSignIn: false,
         requireEmailVerification: true,
     },
+    trustedOrigins: [config.app_origin || "http://localhost:3000"],
     socialProviders: {
         google: {
             prompt: "select_account consent",

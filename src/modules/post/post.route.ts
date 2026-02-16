@@ -16,6 +16,7 @@ router.get(
     authChecker(UserRole.ADMIN, UserRole.USER),
     postController.getPostbyAuthorId,
 );
+router.get("/:postId", postController.getPostByPostId);
 router.patch(
     "/:postId",
     authChecker(UserRole.ADMIN, UserRole.USER),

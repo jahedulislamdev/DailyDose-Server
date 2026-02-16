@@ -91,6 +91,26 @@ const getPosts = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
+const getPostByPostId = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        const { postId } = req.params;
+        console.log(postId);
+
+        const result = await postService.getPostbyId(postId as string);
+        res.status(200).json({
+            success: true,
+            message: "Post Retrived Successfully!",
+            data: result,
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
 const getPostbyAuthorId = async (
     req: Request,
     res: Response,
@@ -163,6 +183,7 @@ export const postController = {
     createPost,
     getPosts,
     getPostbyAuthorId,
+    getPostByPostId,
     updatePost,
     deletePost,
     getStats,
