@@ -98,7 +98,7 @@ const getPostByPostId = async (
 ) => {
     try {
         const { postId } = req.params;
-        console.log(postId);
+        // console.log(postId);
 
         const result = await postService.getPostbyId(postId as string);
         res.status(200).json({
